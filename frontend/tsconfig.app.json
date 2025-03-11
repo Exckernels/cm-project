@@ -22,7 +22,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "noEmit": true
+    "noEmit": false
   },
   "include": ["src"]
 }
