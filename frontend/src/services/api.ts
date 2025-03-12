@@ -1,10 +1,11 @@
 import axios from 'axios';
-import AuthService from './auth.service';
+// import AuthService from './auth.service';
 
 const API_URL = 'https://localhost:8080';
 
 const api = axios.create({
     baseURL: API_URL,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -12,11 +13,7 @@ const api = axios.create({
 
 api.interceptors.response.use(
     (response) => {
-        // Проверка на JSON
-        if (response.data && typeof response.data === 'string') {
-            return Promise.reject(new Error('Ответ не является JSON'));
-        }
-        return response;
+        return response; // сервер всегда должен возвращать JSON
     },
     (error) => {
         if (error.response?.status === 401) {
@@ -29,9 +26,14 @@ api.interceptors.response.use(
 );
 
 api.interceptors.request.use((config) => {
-    const user = AuthService.getCurrentUser();
-    if (user?.accessToken) {
-        config.headers.Authorization = `Bearer ${user.accessToken}`;
+    // const user = AuthService.getCurrentUser();
+    // if (user?.accessToken) {
+    //     config.headers.Authorization = `Bearer ${user.accessToken}`;
+    // }
+    // return config;
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });

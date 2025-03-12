@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import AuthService, { SignInData, SignUpData } from '../services/auth.service';
+// import AuthService, { SignInData, SignUpData } from '../services/auth.service';
+import AuthService from '../services/auth.service';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -31,22 +32,55 @@ function Login() {
 
         try {
             if (isRegistering) {
-                if (!username) {
+                // Валидация данных
+                if (!username.trim()) {
                     throw new Error('Пожалуйста, введите никнейм');
                 }
 
-                const signUpData: SignUpData = { username, email, password };
-                await AuthService.signUp(signUpData);
-                setSuccess('Регистрация успешна!');
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    throw new Error('Некорректный email');
+                }
+
+                if (password.length < 6) {
+                    throw new Error('Пароль должен быть не менее 6 символов');
+                }
+
+                // Регистрация
+                const result = await AuthService.signUp({ username, email, password });
+
+                // Успешная регистрация
+                setSuccess(result.message || 'Регистрация успешна! Вы можете войти');
+
+                // Очистка формы и переключение на вход
+                setIsRegistering(false);
+                setUsername('');
+                setEmail('');
+                setPassword('');
+
             } else {
-                const signInData: SignInData = { email, password };
-                await AuthService.signIn(signInData);
+                // Вход
+                const { token, user } = await AuthService.signIn({ email, password });
+
+                // Сохранение данных
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+
+                // Успешный вход
                 setSuccess('Вход выполнен успешно!');
-                navigate('/profile/me');
+                setTimeout(() => navigate('/profile/me'), 1500);
             }
+
         } catch (err: any) {
             console.error('Authentication error:', err);
-            setError(err.response?.data?.message || err.message || 'Ошибка авторизации');
+            setError(err.message);
+
+            // Сброс полей только для регистрации
+            if (isRegistering) {
+                setUsername('');
+                setEmail('');
+                setPassword('');
+            }
+
         } finally {
             setLoading(false);
         }
