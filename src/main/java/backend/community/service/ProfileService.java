@@ -24,16 +24,11 @@ public class ProfileService {
     }
 
     @Transactional
-    public UserDto updateUser(String email, UserUpdaterDto userUpdaterDto) {
+    public UserDto updateUser(String email, UserUpdaterDto dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-
-        if(userUpdaterDto.bio() != null){
-            user.setBio(userUpdaterDto.bio());
-        }
-        if(userUpdaterDto.profilePictureUrl() != null){
-            user.setProfilePictureUrl(userUpdaterDto.profilePictureUrl());
-        }
+        if (dto.bio() != null) user.setBio(dto.bio());
+        if (dto.profilePictureUrl() != null) user.setProfilePictureUrl(dto.profilePictureUrl());
         return UserDto.fromEntity(user);
     }
     public User getProfile(String email) {
