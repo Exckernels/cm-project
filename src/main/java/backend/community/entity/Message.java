@@ -1,12 +1,18 @@
 package backend.community.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
+import backend.community.enums.MessageType;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+import java.awt.*;
+
+@Entity
+@Table(name="messages")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +27,8 @@ public class Message {
 
     @Column(name = "text")
     private String text;
+
+    private MessageType type;
 
     @Column(name = "is_read")
     private boolean is_read;
